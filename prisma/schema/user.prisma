@@ -1,0 +1,35 @@
+
+enum Gender {
+  CIS_MAN
+  CIS_WOMAN
+  TRANS_MAN
+  TRANS_WOMAN
+  NON_BINARY
+  OTHER
+}
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+
+model User {
+  id String @id @default(uuid())
+
+  name String
+  birthday DateTime?
+  sex Sex?
+  gender Gender?
+  email String
+  username String?
+  password String
+
+  workspaces Workspace[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean @default(false)
+  isActive Boolean @default(true)
+  isVerified Boolean @default(false)
+}
