@@ -1,0 +1,33 @@
+
+enum Genero {
+  HOMEM_CIS
+  MULHER_CIS
+  HOMEM_TRANS
+  MULHER_TRANS
+  NAO_BINARIO
+  OUTRO
+}
+
+enum Sexo {
+  MASCULINO
+  FEMININO
+}
+
+
+model Usuario {
+  id String @id @default(uuid())
+  isDeleted Boolean @default(false)
+  isActive Boolean @default(true)
+  isVerified Boolean @default(false)
+
+  nome String
+  dataNascimento DateTime
+  sexo Sexo?
+  genero Genero?
+
+  email String
+  nickname String
+  senha String
+
+  // adicionar referência para endereço
+}

@@ -1,0 +1,8 @@
+
+model Endereco {
+  id String @id @default(uuid())
+  pais String?
+  cidade String?
+
+  isUsuario Usuario @relation(fields: [id], references: [id])
+}
