@@ -9,7 +9,7 @@ export interface CustomHeaders extends Headers {
 }
 
 export interface CustomRequest extends Request {
-  idUsuario: string
+  userId: string
   headers: CustomHeaders
 }
 
@@ -17,7 +17,7 @@ export interface CustomJwtPayload extends jwt.JwtPayload {
   id: string
 }
 
-const autenticacao = (req: Request, res: Response, next: NextFunction) => {
+const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
   const authHeader : string = (req.headers as CustomHeaders).authorization
   if (!authHeader)
@@ -36,7 +36,7 @@ const autenticacao = (req: Request, res: Response, next: NextFunction) => {
     return next(new UnauthorizedException({ message: "Impossível decodificar token" }))
   }
 
-  (req as CustomRequest).idUsuario = decoded.id
+  (req as CustomRequest).userId = decoded.id
 
   return next()
 }

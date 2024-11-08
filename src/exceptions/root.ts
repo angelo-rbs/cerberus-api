@@ -20,9 +20,9 @@ export abstract class HttpException extends Error {
 }
 
 export enum ErrorCode {
-  USUARIO_NAO_ENCONTRADO = 1000,
-  USUARIO_JA_EXISTE = 1001,
-  SENHA_INCORRETA = 1003,
+  USER_NOT_FOUND = 1000,
+  USER_ALREADY_EXISTS = 1001,
+  INCORRECT_PASSWORD = 1003,
 }
 
 export enum HttpStatusCode {

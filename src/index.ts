@@ -1,10 +1,11 @@
-import express, { Express, Router } from 'express'
+import express, { Express } from 'express'
 import { PrismaClient } from '@prisma/client'
 import dotenv from 'dotenv'
 import rootRouter from '@routes/index'
 import { errorMiddleware } from './middlewares/erros'
 
 import listEndpoints from 'express-list-endpoints'
+
 
 dotenv.config()
 

@@ -4,11 +4,11 @@ import * as jwt from "jsonwebtoken"
 
 import { prisma } from "@src/index";
 import { JWT_SECRET } from "@src/secrets";
-import { registroUsuarioSchema } from "@src/schemas/usuario";
+import { loginSchema, userRegisterSchema } from "@src/schemas/user";
 import { ErrorCode } from "@src/exceptions/root";
 import BadRequestException from "@src/exceptions/bad-request";
 import NotFoundException from "@src/exceptions/not-found";
-import { removerAtributos } from "@src/utils/usuario";
+import { remove } from "@src/utils/user";
 
 const ONE_DAY_IN_SECONDS : number = 86400
 
@@ -16,69 +16,69 @@ export const helloWorld = async(req: Request, res: Response, next: NextFunction)
   return next(res.status(200).send('hello world!'))
 }
 
-type GeracaoTokenProps = {
-  idUsuario: string
+type TokenGeneratorProps = {
+  userId: string
 }
 
-const gerarToken = (params: GeracaoTokenProps) => {
+const generateToken = (params: TokenGeneratorProps) => {
   return jwt.sign(params, JWT_SECRET, { expiresIn: ONE_DAY_IN_SECONDS })
 }
 
 
-export const registrar = async (req: Request, res: Response, next: NextFunction) => {
+export const register = async (req: Request, res: Response, next: NextFunction) => {
 
-  const parsedDTO = registroUsuarioSchema.parse(req.body)
-  const { nome, email, senha, username } = parsedDTO
+  const parsedDTO = userRegisterSchema.parse(req.body)
+  const { name, email, password, username } = parsedDTO
 
-  let usuarioExistente = await prisma.usuario.findFirst({ where: {
+  let existentUser = await prisma.user.findFirst({ where: {
     OR: [{ username }, { email }]
   }})
 
-  if (usuarioExistente && usuarioExistente.email == email)
+  if (existentUser && existentUser.email == email)
     return next(new BadRequestException(
-      { message: 'E-mail já utilizado.', errorCode: ErrorCode.USUARIO_JA_EXISTE }))
+      { message: 'E-mail já utilizado.', errorCode: ErrorCode.USER_ALREADY_EXISTS }))
 
-  if (usuarioExistente && usuarioExistente.username == username)
+  if (existentUser && existentUser.username == username)
     return next(new BadRequestException(
-      { message: 'Nome de usuário já utilizado.', errorCode: ErrorCode.USUARIO_JA_EXISTE }))
+      { message: 'Nome de usuário já utilizado.', errorCode: ErrorCode.USER_ALREADY_EXISTS }))
 
-  const usuarioCriado = await prisma.usuario.create({
+  const newUser = await prisma.user.create({
       data: {
         email,
         username,
-        senha: hashSync(senha, 10),
-        nome
+        password: hashSync(password, 10),
+        name
       }
     })
 
-  const usuarioSemSenha = removerAtributos(usuarioCriado, ['senha'])
-  const token = gerarToken({ idUsuario: usuarioCriado.id })
+  const userWithoutPassword = remove(newUser, ['password'])
+  const token = generateToken({ userId: newUser.id })
 
-  return next(res.status(201).json({ usuarioSemSenha, token }))
+  return next(res.status(201).json({ userWithoutPassword, token }))
 }
 
-export const autenticar = async (req: Request, res: Response, next: NextFunction) => {
+export const auth = async (req: Request, res: Response, next: NextFunction) => {
 
-  const { credencial, senha } = req.body
+  const { credential, password } = loginSchema.parse(req.body)
 
-  const usuarioEncontrado = await prisma.usuario.findFirst({
+  const foundUser = await prisma.user.findFirst({
     where: {
-      OR: [{ username: credencial }, { email: credencial }]
+      OR: [{ username: credential }, { email: credential }]
     },
   })
 
-  if (!usuarioEncontrado)
+  if (!foundUser)
     return next(new NotFoundException(
-      { message: 'Usuário não encontrado.', errorCode: ErrorCode.USUARIO_NAO_ENCONTRADO }))
+      { message: 'Usuário não encontrado.', errorCode: ErrorCode.USER_NOT_FOUND }))
 
-  if (!await compare(senha, usuarioEncontrado.senha))
+  if (!await compare(password, foundUser.password))
     return next(new BadRequestException(
-      { message: 'Senha incorreta.', errorCode: ErrorCode.SENHA_INCORRETA }))
+      { message: 'Senha incorreta.', errorCode: ErrorCode.INCORRECT_PASSWORD }))
 
 
-  // remove a senha do objeto
-  const usuario = removerAtributos(usuarioEncontrado, ['senha'])
-  const token = gerarToken({ idUsuario: usuario.id })
+  // removes password attribute from object
+  const user = remove(foundUser, ['password'])
+  const token = generateToken({ userId: user.id })
 
-  res.json({ usuario, token })
+  res.json({ user, token })
 }

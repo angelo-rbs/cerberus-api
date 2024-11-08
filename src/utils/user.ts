@@ -1,5 +1,5 @@
 
-export const removerAtributos = <T extends Object, Key extends keyof T>(
+export const remove = <T extends Object, Key extends keyof T>(
   user: T,
   keys: Key[]
 ): Omit<T, Key>  => {

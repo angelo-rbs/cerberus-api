@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { autenticar, registrar } from "@controller/auth";
+import { auth, register } from "@controller/auth";
 import validate from "@src/middlewares/validacao";
-import { loginSchema, registroUsuarioSchema } from "@src/schemas/usuario";
+import { loginSchema, userRegisterSchema } from "@src/schemas/user";
 
 const authRoutes = Router()
 
-authRoutes.post('/autenticar', validate(loginSchema), autenticar)
-authRoutes.post('/registrar', validate(registroUsuarioSchema), registrar)
+authRoutes.post('/autenticar', validate(loginSchema), auth)
+authRoutes.post('/registrar', validate(userRegisterSchema), register)
 
 export default authRoutes
