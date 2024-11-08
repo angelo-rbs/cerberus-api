@@ -14,7 +14,8 @@ export const errorMiddleware = (err: Error, _: Request, res: Response, next: Nex
     }))
 
   } else if (err instanceof HttpException) {
-    const { statusCode, errors, logging } = err
+    const { statusCode, errors, logging, message} = err
+    console.log(err)
 
     if (logging) {
       console.error(JSON.stringify({
@@ -24,11 +25,10 @@ export const errorMiddleware = (err: Error, _: Request, res: Response, next: Nex
       }, null, 2))
     }
 
-    return next(res.status(statusCode).send({ errors }))
+    return next(res.status(statusCode).send({ message:  message, errors }))
   }
 
 
   // Unhandled errors
-  console.error(JSON.stringify(err, null, 2));
   return next(res.status(500).send({ errors: [{ message: "Something went wrong" }] }))
 }

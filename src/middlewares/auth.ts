@@ -1,35 +1,34 @@
 import UnauthorizedException from "@src/exceptions/unauthorized";
 import { JWT_SECRET } from "@src/secrets";
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 
 
-export interface CustomHeaders extends Headers {
-  authorization: string
-}
-
 export interface CustomRequest extends Request {
-  userId: string
-  headers: CustomHeaders
+  userId: string,
 }
 
 export interface CustomJwtPayload extends jwt.JwtPayload {
   id: string
 }
 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
-  const authHeader : string = (req.headers as CustomHeaders).authorization
-  if (!authHeader)
+  const authHeader = req.headers.authorization
+
+  if (!authHeader) {
     return next(new UnauthorizedException({ message: "Nenhum token fornecido" }))
+  }
 
   const partes = authHeader.split(" ")
-  if (!(partes.length === 2))
+  if (!(partes.length === 2)) {
     return next(new UnauthorizedException({ message: "Erro de token" }))
+  }
 
   const [scheme, token] = partes
-  if (!/^Bearer$/i.test(scheme))
+  if (!/^Bearer$/i.test(scheme)) {
     return next(new UnauthorizedException({ message: "Formato do token inesperado" }))
+  }
 
   const decoded = jwt.verify(token, JWT_SECRET) as CustomJwtPayload
   if (!decoded) {

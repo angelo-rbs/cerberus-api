@@ -3,9 +3,10 @@ import { PrismaClient } from '@prisma/client'
 import dotenv from 'dotenv'
 import rootRouter from '@routes/index'
 import { errorMiddleware } from './middlewares/erros'
+import { authMiddleware } from './middlewares/auth'
 
 import listEndpoints from 'express-list-endpoints'
-
+import { helloWorld } from './controller/auth'
 
 dotenv.config()
 
@@ -22,10 +23,11 @@ export const prisma = new PrismaClient({log: ["query"]})
 
 async function main() {
 
+
     app.use("/api", rootRouter)
+    console.log(listEndpoints(app))
     app.use(errorMiddleware)
 
-    console.log(listEndpoints(app))
 
     app.listen(PORT, () => {
         console.log(`server running on port ${PORT}`)
