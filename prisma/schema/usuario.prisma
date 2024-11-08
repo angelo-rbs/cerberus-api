@@ -31,6 +31,4 @@ model Usuario {
   email String
   username String?
   senha String
-
-  endereco Endereco?
 }
